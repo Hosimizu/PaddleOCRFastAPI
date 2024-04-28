@@ -9,8 +9,8 @@ from models.RestfulModel import *
 from routers import ocr
 from utils.ImageHelper import *
 
-app = FastAPI(title="Paddle OCR API",
-              description="基于 Paddle OCR 和 FastAPI 的自用接口")
+app = FastAPI(title="通用文本OCR识别",
+              description="通用文本OCR识别")
 
 
 # 跨域设置

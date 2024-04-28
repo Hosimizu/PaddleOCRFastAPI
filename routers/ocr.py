@@ -15,7 +15,7 @@ router = APIRouter(prefix="/ocr", tags=["OCR"])
 ocr = PaddleOCR(use_angle_cls=True, lang=OCR_LANGUAGE)
 
 
-@router.get('/predict-by-path', response_model=RestfulModel, summary="识别本地图片")
+# @router.get('/predict-by-path', response_model=RestfulModel, summary="识别本地图片")
 def predict_by_path(image_path: str):
     result = ocr.ocr(image_path, cls=True)
     restfulModel = RestfulModel(
@@ -23,7 +23,7 @@ def predict_by_path(image_path: str):
     return restfulModel
 
 
-@router.post('/predict-by-base64', response_model=RestfulModel, summary="识别 Base64 数据")
+@router.post('/predict-ocr-base64', response_model=RestfulModel, summary="Base64识别")
 def predict_by_base64(base64model: Base64PostModel):
     img = base64_to_ndarray(base64model.base64_str)
     result = ocr.ocr(img=img, cls=True)
@@ -32,7 +32,7 @@ def predict_by_base64(base64model: Base64PostModel):
     return restfulModel
 
 
-@router.post('/predict-by-file', response_model=RestfulModel, summary="识别上传文件")
+@router.post('/predict-ocr-file', response_model=RestfulModel, summary="文件识别")
 async def predict_by_file(file: UploadFile):
     restfulModel: RestfulModel = RestfulModel()
     if file.filename.endswith((".jpg", ".png")):  # 只处理常见格式图片
@@ -51,7 +51,7 @@ async def predict_by_file(file: UploadFile):
     return restfulModel
 
 
-@router.get('/predict-by-url', response_model=RestfulModel, summary="识别图片 URL")
+# @router.get('/predict-by-url', response_model=RestfulModel, summary="识别图片 URL")
 async def predict_by_url(imageUrl: str):
     restfulModel: RestfulModel = RestfulModel()
     response = requests.get(imageUrl)
