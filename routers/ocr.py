@@ -5,6 +5,7 @@ from models.OCRModel import *
 from models.RestfulModel import *
 from paddleocr import PaddleOCR
 from utils.ImageHelper import base64_to_ndarray, bytes_to_ndarray
+from utils.licenseTransfer import licenseTransfer
 import requests
 import os
 
@@ -51,7 +52,7 @@ async def predict_by_file(file: UploadFile):
     return restfulModel
 
 
-# @router.get('/predict-by-url', response_model=RestfulModel, summary="识别图片 URL")
+@router.get('/predict-by-url', response_model=RestfulModel, summary="识别图片 URL")
 async def predict_by_url(imageUrl: str):
     restfulModel: RestfulModel = RestfulModel()
     response = requests.get(imageUrl)
@@ -59,6 +60,25 @@ async def predict_by_url(imageUrl: str):
     if image_bytes.startswith(b"\xff\xd8\xff") or image_bytes.startswith(b"\x89PNG\r\n\x1a\n"):  # 只处理常见格式图片 (jpg / png)
         restfulModel.resultcode = 200
         img = bytes_to_ndarray(image_bytes)
+        result = ocr.ocr(img=img, cls=True)
+        restfulModel.data = result
+        restfulModel.message = "Success"
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="请上传 .jpg 或 .png 格式图片"
+        )
+    return restfulModel
+
+@router.get('/predict-by-url-license-file', response_model=RestfulModel, summary="识别图片 URL")
+async def predict_by_url_license_file(imageUrl: str):
+    restfulModel: RestfulModel = RestfulModel()
+    response = requests.get(imageUrl)
+    image_bytes = response.content
+    if image_bytes.startswith(b"\xff\xd8\xff") or image_bytes.startswith(b"\x89PNG\r\n\x1a\n"):  # 只处理常见格式图片 (jpg / png)
+        restfulModel.resultcode = 200
+        img = bytes_to_ndarray(image_bytes)
+        img = licenseTransfer(img)
         result = ocr.ocr(img=img, cls=True)
         restfulModel.data = result
         restfulModel.message = "Success"
